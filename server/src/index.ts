@@ -5,6 +5,7 @@ import { UserResolver } from "./modules/user/user.resolver";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4"
 import { json } from "body-parser";
+import cors from "cors";
 
 async function main() {
     const schema = await buildSchema({
@@ -19,7 +20,7 @@ async function main() {
 
     await server.start();
 
-    app.use('/graphql', json(), expressMiddleware(server));
+    app.use('/graphql', cors<cors.CorsRequest>(), json(), expressMiddleware(server));
 
     app.listen(4000, () => {
         console.log("Listening to http://localhost:4000");

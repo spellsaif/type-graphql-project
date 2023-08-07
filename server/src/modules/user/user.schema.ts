@@ -1,4 +1,4 @@
-import { ObjectType, Field } from "type-graphql";
+import { ObjectType, Field, InputType } from "type-graphql";
 
 @ObjectType()
 export class User {
@@ -14,4 +14,14 @@ export class User {
 
     @Field(() => String)
     updatedAt: Date;
+}
+
+@InputType()
+export class UserInput {
+
+    @Field(() => String)
+    username: string;
+
+    @Field(() => String)
+    password: string;
 }
