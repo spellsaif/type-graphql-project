@@ -17,9 +17,8 @@ export class UserResolver {
         @Arg('option') option: UserInput,
         @Ctx() ctx: MyContext
     ): Promise<User | null> {
-        const userRepository = myDataSource.getRepository(User);
         //check whether already exist or not
-        const user = await userRepository.findOne({ where: { username: option.username } })
+        const user = await User.findOne({ where: { username: option.username } })
 
         if (user) {
             return null;
@@ -27,7 +26,7 @@ export class UserResolver {
 
         option.password = await hash(option.password, 10);
 
-        const newUser = await userRepository.create({ ...option }).save();
+        const newUser = await User.create({ ...option }).save();
 
         return newUser;
 
