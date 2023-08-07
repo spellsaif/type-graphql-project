@@ -6,6 +6,7 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4"
 import { json } from "body-parser";
 import cors from "cors";
+import config from 'config';
 
 async function main() {
     const schema = await buildSchema({
@@ -22,8 +23,9 @@ async function main() {
 
     app.use('/graphql', cors<cors.CorsRequest>(), json(), expressMiddleware(server));
 
-    app.listen(4000, () => {
-        console.log("Listening to http://localhost:4000");
+    const SERVER_PORT = config.get('server.port');
+    app.listen(SERVER_PORT, () => {
+        console.log(`Listening to http://localhost:${SERVER_PORT}`);
     })
 
 }
