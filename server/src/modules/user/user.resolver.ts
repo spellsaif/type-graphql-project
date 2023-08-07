@@ -1,6 +1,8 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { MyContext } from "../..";
+import myDataSource from "../../utils/db";
 import { User, UserInput } from "./user.schema";
+import { hash } from 'bcrypt';
 
 @Resolver()
 export class UserResolver {
@@ -10,18 +12,24 @@ export class UserResolver {
         return "Hello World"
     }
 
-    @Mutation()
-    register(
+    @Mutation(() => User)
+    async register(
         @Arg('option') option: UserInput,
         @Ctx() ctx: MyContext
-    ): User {
-        const user = {
-            id: 'skdjsdklasjd',
-            username: option.username,
-            password: option.password,
-            createdAt: new Date(),
-            updatedAt: new Date()
+    ): Promise<User | null> {
+        const userRepository = myDataSource.getRepository(User);
+        //check whether already exist or not
+        const user = await userRepository.findOne({ where: { username: option.username } })
+
+        if (user) {
+            return null;
         }
-        return user;
+
+        option.password = await hash(option.password, 10);
+
+        const newUser = await userRepository.create({ ...option }).save();
+
+        return newUser;
+
     }
 }
