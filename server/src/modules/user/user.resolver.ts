@@ -16,6 +16,7 @@ export class UserResolver {
         @Ctx() ctx: MyContext
     ): User {
         const user = {
+            id: 'skdjsdklasjd',
             username: option.username,
             password: option.password,
             createdAt: new Date(),

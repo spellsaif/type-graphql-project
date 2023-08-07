@@ -9,36 +9,48 @@ import { json } from "body-parser";
 import cors from "cors";
 import config from 'config';
 import http from 'node:http'
+import myDataSource from "./utils/db";
 
 export type MyContext = {
-    req: Request
+    req: Request,
 }
 
 async function main() {
-    const schema = await buildSchema({
-        resolvers: [UserResolver],
-    })
 
-    const app = express();
+    try {
+        await myDataSource.initialize();
+        console.log("Data source is initialized.")
+        const schema = await buildSchema({
+            resolvers: [UserResolver],
+        })
+        const app = express();
 
-    const httpServer = http.createServer(app);
+        const httpServer = http.createServer(app);
 
-    const server = new ApolloServer<MyContext>({
-        schema,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
-    })
+        const server = new ApolloServer<MyContext>({
+            schema,
+            plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
+        })
 
-    await server.start();
+        await server.start();
 
-    app.use('/graphql', cors<cors.CorsRequest>(), json(), expressMiddleware(server, {
-        context: async ({ req }) => ({ req })
-    }));
+        app.use('/graphql', cors<cors.CorsRequest>(), json(), expressMiddleware(server, {
+            context: async ({ req }) => ({ req })
+        }));
 
-    const SERVER_PORT = config.get('server.port');
+        const SERVER_PORT = config.get('server.port');
 
-    await new Promise<void>((resolve) => httpServer.listen({ port: SERVER_PORT }, resolve));
+        await new Promise<void>((resolve) => httpServer.listen({ port: SERVER_PORT }, resolve));
 
-    console.log(`🚀 Server ready at http://localhost:${SERVER_PORT}/graphql`);
+        console.log(`🚀 Server ready at http://localhost:${SERVER_PORT}/graphql`);
+
+
+
+    } catch (e) {
+        console.log(e);
+
+    }
+
 
 }
 
