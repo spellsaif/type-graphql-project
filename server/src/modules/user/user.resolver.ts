@@ -1,4 +1,5 @@
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { MyContext } from "../..";
 import { User, UserInput } from "./user.schema";
 
 @Resolver()
@@ -10,7 +11,10 @@ export class UserResolver {
     }
 
     @Mutation()
-    register(@Arg('option') option: UserInput): User {
+    register(
+        @Arg('option') option: UserInput,
+        @Ctx() ctx: MyContext
+    ): User {
         const user = {
             username: option.username,
             password: option.password,
