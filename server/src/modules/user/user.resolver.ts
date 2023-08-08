@@ -1,7 +1,7 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { MyContext } from "../..";
 import myDataSource from "../../utils/db";
-import { User, UserInput } from "./user.schema";
+import { User, UserInput, UserResponse } from "./user.schema";
 import { hash } from 'bcrypt';
 
 @Resolver()
@@ -12,23 +12,33 @@ export class UserResolver {
         return "Hello World"
     }
 
-    @Mutation(() => User)
+    @Mutation(() => UserResponse)
     async register(
         @Arg('option') option: UserInput,
-        @Ctx() ctx: MyContext
-    ): Promise<User | null> {
+    ): Promise<UserResponse> {
         //check whether already exist or not
         const user = await User.findOne({ where: { username: option.username } })
 
         if (user) {
-            return null;
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: " username already exists!"
+                    }
+                ],
+            }
         }
+
+
 
         option.password = await hash(option.password, 10);
 
         const newUser = await User.create({ ...option }).save();
 
-        return newUser;
+        return {
+            user: newUser
+        }
 
     }
 }

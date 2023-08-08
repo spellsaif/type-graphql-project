@@ -34,3 +34,24 @@ export class UserInput {
     @Field(() => String)
     password: string;
 }
+
+@ObjectType()
+export class FieldError {
+
+    @Field(() => String)
+    field: string;
+
+    @Field(() => String)
+    message: string;
+}
+
+@ObjectType()
+export class UserResponse {
+
+    @Field(() => [FieldError], { nullable: true })
+    errors?: Error[];
+
+    @Field(() => User, { nullable: true })
+    user?: User;
+
+}
