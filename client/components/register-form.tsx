@@ -18,6 +18,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
+import { useRegisterMutation, UserInput } from "@/generated/graphql";
+import {useRouter} from "next/navigation"
+import { errorMap } from "@/utils/error-map";
 
 const FormSchema = z.object({
   username: z.string().min(6, {
@@ -33,7 +36,28 @@ const RegisterForm = () => {
     resolver: zodResolver(FormSchema),
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {}
+  const [_, register] = useRegisterMutation()
+  const router = useRouter();
+
+  async function onSubmit(data: z.infer<typeof FormSchema>, e?:any) {
+    e.preventDefault();
+    console.log(data)
+    const response = await register({
+      option: data
+    });
+
+    if(response.data?.register.errors){
+      const errors = response.data.register.errors
+      errors.forEach(({field, message})=> {
+        form.setError(field,{message} )
+      })    
+
+    }
+
+    if(response.data?.register.user) {
+      router.push('/');
+    }
+  }
 
   return (
     <Form {...form}>

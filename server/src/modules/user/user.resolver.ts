@@ -21,7 +21,7 @@ export class UserResolver {
                 errors: [
                     {
                         field: "username",
-                        message: "Invalid Credentials!"
+                        message: "username doesn'nt exist!"
                     }
                 ],
             }
@@ -36,7 +36,7 @@ export class UserResolver {
                 errors: [
                     {
                         field: "password",
-                        message: "Invalid Credentials!"
+                        message: "Incorrect Password!"
                     }
                 ],
             }

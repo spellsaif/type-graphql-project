@@ -18,6 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
+import { useLoginMutation } from "@/generated/graphql";
+import { useRouter } from "next/navigation";
 
 const FormSchema = z.object({
   username: z.string().min(6, {
@@ -33,7 +35,27 @@ const LoginForm = () => {
     resolver: zodResolver(FormSchema),
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  const [_, login] = useLoginMutation()
+  const router = useRouter();
+
+  async function onSubmit(data: z.infer<typeof FormSchema>, e:any) {
+    e.preventDefault();
+    
+    const response = await login({
+      option: data
+    })
+
+    if(response.data?.login.errors) {
+      const errors = response.data.login.errors;
+
+      errors.forEach(({field, message}) => {
+        form.setError(field, {message});
+      })
+    }
+
+    if(response.data?.login.user) {
+        router.push('/')
+    }
     console.log(data);
   }
 
