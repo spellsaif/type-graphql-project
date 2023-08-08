@@ -12,6 +12,7 @@ const ssr = ssrExchange();
 const client = createClient({
   url: "http://localhost:4000/graphql",
   exchanges: [cacheExchange, ssr, fetchExchange],
+  
 });
 
 const URQLProvider = ({ children }: { children: React.ReactNode }) => {

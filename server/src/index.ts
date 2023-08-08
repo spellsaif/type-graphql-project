@@ -14,8 +14,10 @@ import session, { Session, SessionData } from "express-session";
 import { Redis } from "ioredis";
 import connectRedis from "connect-redis";
 
+
+
 export type MyContext = {
-    req: Request
+    req: Request & { session?: Session & { userId?: any } }
 }
 
 async function main() {
@@ -27,19 +29,6 @@ async function main() {
             resolvers: [UserResolver],
         })
         const app = express();
-
-        const httpServer = http.createServer(app);
-
-        const server = new ApolloServer<MyContext>({
-            schema,
-            plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
-        })
-
-        await server.start();
-
-        app.use('/graphql', cors<cors.CorsRequest>(), json(), expressMiddleware(server, {
-            context: async ({ req }) => ({ req })
-        }));
 
         const RedisStore = connectRedis(session);
         const redis = new Redis("redis://default:SmPHIjx8EUyPsCB9F6K6LWY02LYrKaVT@redis-13108.c301.ap-south-1-1.ec2.cloud.redislabs.com:13108");
@@ -61,6 +50,26 @@ async function main() {
             secret: "thisissecret",
             resave: false
         }))
+
+        const httpServer = http.createServer(app);
+
+        const server = new ApolloServer<MyContext>({
+            schema,
+            plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
+        })
+
+        await server.start();
+
+        app.use('/graphql', cors<cors.CorsRequest>({
+            credentials: true,
+            origin: "http://localhost:3000"
+        }), json(), expressMiddleware(server, {
+            context: async ({ req }) => ({ req })
+        }));
+
+
+
+
 
         const SERVER_PORT = config.get('server.port');
 

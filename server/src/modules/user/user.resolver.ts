@@ -20,6 +20,7 @@ export class UserResolver {
         //check whether already exist or not
         const user = await User.findOne({ where: { username: option.username } })
 
+
         if (!user) {
             return {
                 errors: [
@@ -46,8 +47,10 @@ export class UserResolver {
             }
         }
 
-        // @ts-ignore
+
         req.session.userId = user.id;
+        console.log(req.session.userId)
+
 
         return {
             user
@@ -58,6 +61,7 @@ export class UserResolver {
     @Mutation(() => UserResponse)
     async register(
         @Arg('option') option: UserInput,
+        @Ctx() { req }: MyContext
     ): Promise<UserResponse> {
         //check whether already exist or not
         const exist = await User.findOne({ where: { username: option.username } })
@@ -78,6 +82,9 @@ export class UserResolver {
         option.password = await hash(option.password, 10);
 
         const user = await User.create({ ...option }).save();
+
+        req.session.userId = user.id;
+        console.log(req.session.userId)
 
         return {
             user
