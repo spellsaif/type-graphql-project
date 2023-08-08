@@ -33,10 +33,7 @@ const RegisterForm = () => {
     resolver: zodResolver(FormSchema),
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>, e: FormDataEvent) {
-    e.preventDefault();
-    console.log(data);
-  }
+  async function onSubmit(data: z.infer<typeof FormSchema>) {}
 
   return (
     <Form {...form}>
