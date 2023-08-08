@@ -37,7 +37,7 @@ const LoginForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
         <FormField
           control={form.control}
           name="username"
@@ -66,7 +66,7 @@ const LoginForm = () => {
           )}
         />
         <Button type="submit" className="w-full">
-          Submit
+          Login
         </Button>
       </form>
     </Form>
