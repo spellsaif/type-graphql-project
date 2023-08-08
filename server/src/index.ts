@@ -10,9 +10,12 @@ import cors from "cors";
 import config from 'config';
 import http from 'node:http'
 import myDataSource from "./utils/db";
+import session, { Session, SessionData } from "express-session";
+import { Redis } from "ioredis";
+import connectRedis from "connect-redis";
 
 export type MyContext = {
-    req: Request,
+    req: Request
 }
 
 async function main() {
@@ -37,6 +40,27 @@ async function main() {
         app.use('/graphql', cors<cors.CorsRequest>(), json(), expressMiddleware(server, {
             context: async ({ req }) => ({ req })
         }));
+
+        const RedisStore = connectRedis(session);
+        const redis = new Redis("redis://default:SmPHIjx8EUyPsCB9F6K6LWY02LYrKaVT@redis-13108.c301.ap-south-1-1.ec2.cloud.redislabs.com:13108");
+
+        app.use(session({
+            name: "qid",
+            store: new RedisStore({
+                disableTouch: true,
+                client: redis
+            }),
+
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+                httpOnly: true,
+                sameSite: "lax",
+                secure: false
+            },
+            saveUninitialized: false,
+            secret: "thisissecret",
+            resave: false
+        }))
 
         const SERVER_PORT = config.get('server.port');
 

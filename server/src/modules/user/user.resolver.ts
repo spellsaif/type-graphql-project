@@ -1,6 +1,7 @@
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { User, UserInput, UserResponse } from "./user.schema";
 import { hash, compare } from 'bcrypt';
+import { MyContext } from "../..";
 
 @Resolver()
 export class UserResolver {
@@ -11,7 +12,10 @@ export class UserResolver {
     }
 
     @Mutation(() => UserResponse)
-    async login(@Arg('option') option: UserInput): Promise<UserResponse> {
+    async login(
+        @Arg('option') option: UserInput,
+        @Ctx() { req }: MyContext
+    ): Promise<UserResponse> {
 
         //check whether already exist or not
         const user = await User.findOne({ where: { username: option.username } })
@@ -41,6 +45,9 @@ export class UserResolver {
                 ],
             }
         }
+
+        // @ts-ignore
+        req.session.userId = user.id;
 
         return {
             user
