@@ -49,7 +49,7 @@ export class FieldError {
 export class UserResponse {
 
     @Field(() => [FieldError], { nullable: true })
-    errors?: Error[];
+    errors?: FieldError[];
 
     @Field(() => User, { nullable: true })
     user?: User;

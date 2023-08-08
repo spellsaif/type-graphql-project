@@ -1,8 +1,6 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { MyContext } from "../..";
-import myDataSource from "../../utils/db";
+import { Arg, Mutation, Query, Resolver } from "type-graphql";
 import { User, UserInput, UserResponse } from "./user.schema";
-import { hash } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 
 @Resolver()
 export class UserResolver {
@@ -13,13 +11,51 @@ export class UserResolver {
     }
 
     @Mutation(() => UserResponse)
+    async login(@Arg('option') option: UserInput): Promise<UserResponse> {
+
+        //check whether already exist or not
+        const user = await User.findOne({ where: { username: option.username } })
+
+        if (!user) {
+            return {
+                errors: [
+                    {
+                        field: "username",
+                        message: "Invalid Credentials!"
+                    }
+                ],
+            }
+        }
+
+        //checking password
+
+        const valid = await compare(option.password, user.password);
+
+        if (!valid) {
+            return {
+                errors: [
+                    {
+                        field: "password",
+                        message: "Invalid Credentials!"
+                    }
+                ],
+            }
+        }
+
+        return {
+            user
+        }
+
+    }
+
+    @Mutation(() => UserResponse)
     async register(
         @Arg('option') option: UserInput,
     ): Promise<UserResponse> {
         //check whether already exist or not
-        const user = await User.findOne({ where: { username: option.username } })
+        const exist = await User.findOne({ where: { username: option.username } })
 
-        if (user) {
+        if (exist) {
             return {
                 errors: [
                     {
@@ -34,10 +70,10 @@ export class UserResolver {
 
         option.password = await hash(option.password, 10);
 
-        const newUser = await User.create({ ...option }).save();
+        const user = await User.create({ ...option }).save();
 
         return {
-            user: newUser
+            user
         }
 
     }
