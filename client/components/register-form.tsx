@@ -28,12 +28,13 @@ const FormSchema = z.object({
   }),
 });
 
-const LoginForm = () => {
+const RegisterForm = () => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit(data: z.infer<typeof FormSchema>, e: FormDataEvent) {
+    e.preventDefault();
     console.log(data);
   }
 
@@ -68,14 +69,14 @@ const LoginForm = () => {
           )}
         />
         <Button type="submit" className="w-full">
-          Login
+          Sign Up
         </Button>
 
         <Separator className="my-4" />
         <p className="text-center text-sm text-gray-900">
-          Don't have account?{" "}
-          <Link href="/register" className="font-bold">
-            Sign Up
+          Already have account?{" "}
+          <Link href="/login" className="font-bold">
+            Login
           </Link>
         </p>
       </form>
@@ -83,4 +84,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
