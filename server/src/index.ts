@@ -1,19 +1,11 @@
 import "reflect-metadata";
-import express, { Request } from "express"
-import { buildSchema } from "type-graphql";
-import { UserResolver } from "./modules/user/user.resolver";
-import { ApolloServer } from "@apollo/server";
-import { expressMiddleware } from "@apollo/server/express4"
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer"
-import { json } from "body-parser";
-import cors from "cors";
+import { Request, Response } from "express"
 import config from 'config';
-import http from 'node:http'
 import myDataSource from "./utils/db";
-import session, { Session, SessionData } from "express-session";
-import { Redis } from "ioredis";
-import connectRedis from "connect-redis";
+import { Session } from "express-session";
+import dotenv from 'dotenv'
 
+import createServer from "./utils/create-server";
 
 
 export type MyContext = {
@@ -22,54 +14,17 @@ export type MyContext = {
 
 async function main() {
 
+    dotenv.config();
+
     try {
         await myDataSource.initialize();
         console.log("Data source is initialized.")
-        const schema = await buildSchema({
-            resolvers: [UserResolver],
+
+        const { app, httpServer } = await createServer();
+
+        app.get("/", (_, res: Response) => {
+            res.send("working!!!!")
         })
-        const app = express();
-
-        const RedisStore = connectRedis(session);
-        const redis = new Redis("redis://default:SmPHIjx8EUyPsCB9F6K6LWY02LYrKaVT@redis-13108.c301.ap-south-1-1.ec2.cloud.redislabs.com:13108");
-
-        app.use(session({
-            name: "qid",
-            store: new RedisStore({
-                disableTouch: true,
-                client: redis
-            }),
-
-            cookie: {
-                maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-                httpOnly: true,
-                sameSite: "lax",
-                secure: false
-            },
-            saveUninitialized: false,
-            secret: "thisissecret",
-            resave: false
-        }))
-
-        const httpServer = http.createServer(app);
-
-        const server = new ApolloServer<MyContext>({
-            schema,
-            plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
-        })
-
-        await server.start();
-
-        app.use('/graphql', cors<cors.CorsRequest>({
-            credentials: true,
-            origin: "http://localhost:3000"
-        }), json(), expressMiddleware(server, {
-            context: async ({ req }) => ({ req })
-        }));
-
-
-
-
 
         const SERVER_PORT = config.get('server.port');
 
@@ -81,7 +36,6 @@ async function main() {
 
     } catch (e) {
         console.log(e);
-
     }
 
 

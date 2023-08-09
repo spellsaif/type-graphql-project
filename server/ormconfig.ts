@@ -1,5 +1,4 @@
 import { DataSourceOptions } from "typeorm";
-import config from 'config';
 import { User } from "./src/modules/user/user.schema";
 
 export const dbConfig: DataSourceOptions = {

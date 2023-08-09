@@ -7,8 +7,9 @@ import { MyContext } from "../..";
 export class UserResolver {
 
     @Query(() => String)
-    hello() {
-        return "Hello World"
+    hello(@Ctx() { req }: MyContext) {
+        console.log(req.session.userId)
+        return `Session ID: ${req.session.userId}`
     }
 
     @Mutation(() => UserResponse)
